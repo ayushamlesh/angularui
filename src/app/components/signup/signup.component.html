@@ -1,0 +1,77 @@
+<!-- Section: Design Block -->
+<section class="text-center">
+  <!-- Background image -->
+  <div class="p-5 bg-image" style="
+        background-image: url('https://mdbootstrap.com/img/new/textures/full/171.jpg');
+        height: 300px;
+        "></div>
+  <!-- Background image -->
+
+  <div class="card mx-4 mx-md-5 shadow-5-strong" style="
+        margin-top: -100px;
+        background: hsla(0, 0%, 100%, 0.8);
+        backdrop-filter: blur(30px);
+        ">
+    <div class="card-body py-5 px-md-5">
+
+      <div class="row d-flex justify-content-center">
+        <div class="col-lg-8">
+          <h2 class="fw-bold mb-5">Sign up now</h2>
+          <form [formGroup]="signUpForm">
+            <!-- 2 column grid layout with text inputs for the first and last names -->
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <div class="form-outline">
+                  <div class="input-field" [class.error]="signUpForm.controls['firstname'].dirty && signUpForm.hasError('required','firstname')">
+                  <input type="text" formControlName="firstname" placeholder="First Name" id="form3Example1" class="form-control" />
+                  <label class="form-label" for="form3Example1">First Name</label>
+                </div>
+                </div>
+              </div>
+              </div>
+              <small *ngIf="signUpForm.controls['firstname'].dirty && signUpForm.hasError('required','firstname')"  class="text-danger">FirstName is required</small>
+
+
+              <div class="col-md-6 mb-4">
+                <div class="form-outline">
+                  <div class="input-field" [class.error]="signUpForm.controls['lastname'].dirty && signUpForm.hasError('required','lastname')">
+                  <input type="text" formControlName="lastname" placeholder="Last NAme" id="form3Example2" class="form-control" />
+                  <label class="form-label" for="form3Example2">Last name</label>
+                </div>
+                </div>
+              </div>
+              <small *ngIf="signUpForm.controls['lastname'].dirty && signUpForm.hasError('required','lastname')"  class="text-danger">Last Name is required</small>
+
+
+
+            <!-- Email input -->
+            <div class="form-outline mb-4">
+              <input type="email" formControlName="email" palceholder="Email" id="form3Example3" class="form-control" />
+              <label class="form-label" for="form3Example3">Email address</label>
+            </div>
+            <small *ngIf="signUpForm.controls['email'].dirty && signUpForm.hasError('required','email')"  class="text-danger">Email is required</small>
+
+            <!-- Password input -->
+            <div class="form-group input-group-lg" >
+              <div class="input-field" [class.error]="signUpForm.controls['password'].dirty && signUpForm.hasError('required','password')">
+              <input  [type]="type" formControlName="password"  class="form-control" id="exampleInputPassword1" placeholder="Password ">
+              <span (click)="hideShowPass()" class="fa {{eyeIcon}}"></span>
+            </div>
+            <span class="text-danger">Password must have: <br>8 characters lower and upper case <br>Password should contain special chars @ or $ or % </span>
+
+          </div>
+            <small *ngIf="signUpForm.controls['password'].dirty && signUpForm.hasError('required','password')"  class="text-danger">Password is required</small>
+
+            <br>
+            <!-- Submit button -->
+            <button (click)="onSignUp()" type="submit" class="btn btn-primary btn-block mb-4">
+              Sign up
+            </button>
+            <a routerLink="/login">SignIn</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Section: Design Block -->

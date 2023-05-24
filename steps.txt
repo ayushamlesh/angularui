@@ -1,0 +1,178 @@
+1.add folders =>components,helpers,models,services
+2.go to components and create login and signup components
+3.ng g c login
+4. add path to route so that it can go to the login and signup
+5.const routes: Routes = [
+  // adding path of component
+  {path:"login",component:LoginComponent},
+  {path:"signup",component:SignupComponent}]
+6.add html file in the componet.
+7. to make form reactive do this
+8. write reactive under import in app.modules.test
+ imports: [
+    BrowserModule,
+    AppRoutingModule,
+    ReactiveFormsModule
+  ],
+9.validation Steps
+10.import in app.module "ReactiveFormsModule"
+11.go to LoginComponent
+12.added [class.error] in the property of tags.
+13. added signUpForm!:FormGroup;
+14.by the help of ngOnInit added validators on FormGroup
+15.we are using validateAllFormFields for validating the form. to reduse rewrite.
+16.add a validateForm.ts in the helper folder and then inprt in the login and sig up.ts
+17. line number 45 =>     validateForm.validateAllFormFields(this.signUpForm);
+
+-------------now creating webabpi backend---------------------
+
+1.add dbcontext for user.cs
+2.Inject data by help of OnModelCreating
+3.enable-add-update migration
+4. addted signup,sigin controller and updated database.
+5. come here to user webapi.
+----------------LoginUI----------------------
+1. create service in the service folder.
+2. ng g s services/auth is used to create path service.
+3. in the service file do the below
+  //for connecting with API add here url of register.
+  private baseUrl:string ="https://localhost:7180/api/User/register" // get the URL of Api.
+  constructor(private http:HttpClient) { }
+
+4. create constructor
+5. import { HttpClient } from '@angular/common/http';
+6.app.model mai add "HttpClientModule"
+
+7. inject httpClient at the place where we want to use it.
+8. in auth.services.ts =>
+  signUp(userObj:any){
+    return this.http.post<any>(`${this.baseUrl}register`,userObj);
+  }
+
+9.in the component.ts do
+  constructor(private fb: FormBuilder,private auth:AuthService){ }
+onLogin(){
+      if(this.loginForm.valid)
+      {
+        //sent to db
+        this.auth.login(this.loginForm.value)
+        .subscribe(
+          {
+            next:(res)=>{
+              alert(res.message);
+            },
+            error:(err)=>{alert(err.error.message)}
+
+          }
+        )
+      }
+}
+
+10.now it will give cross-origin error at runtime. because of different origin call
+11.config it in .net core project
+------------.net core------------
+12.confit cross in program.cs
+  //add coss
+builder.Services.AddCors(options =>{ options.AddPolicy("MyPolicy", builder => {
+    builder.AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader();
+        });
+})
+
+13.go to pipeline
+    app.UseHttpsRedirection();
+    //add it to go
+    app.UseCors("MyPloicy");
+
+--------hash the password----
+14.Added passwordHasher.cs in the helper file.
+15. write some code in register to use the function
+            userObj.Password=PasswordHasher.HashPassword(userObj.Password);
+            userObj.Role = "User";
+            userObj.Token = "";
+16. Added CheckPasswordStrength.
+17.created jwt token in user controller
+18. in program.cs adding authentication in builder then call it
+19. Now to prevent routing without login we will be creating the "auth.service.ts" in authservice.
+20. write these : storeToken(tokenvalue:string){
+      localStorage.setItem('token',tokenvalue);
+    }
+
+    //gettoken
+    getToken(){
+      return localStorage.getItem('token');
+    }
+
+    isLogedIn():boolean{
+      return !!localStorage.getItem('token');
+    }
+
+21. now go to login component add "  this.loginForm.reset();
+                                    this.auth.storeToken(res.token);"
+                                    In the onLogin()=> .subscribe.
+
+22.create authguard "ng g guard <authguard-name>" go to auth.guard.ts
+
+23. inject authservice using constructor
+      authguard.ts file contect.
+      import { Injectable } from "@angular/core";
+        import { CanActivate } from "@angular/router";
+        import { AuthService } from "../services/auth.service";
+
+        @Injectable({
+          providedIn: 'root'
+        })
+
+        export class authguard implements CanActivate{
+          constructor(private auth: AuthService) {
+            }
+            canActivate():boolean {
+              if(this.auth.isLogedIn()){
+                return true;
+              }
+              else{
+                this.router.navigate(['login'])
+                alert(`Please Login`)
+                return false;
+                }
+            }
+        }
+
+
+24.add ",canActivate:[authguard]" in the path of dasboard page in the app-routingmodule.
+
+25.now to implementing the logout frnctin from dashboard
+26.in services add  //logout and constructor for router
+                  signOut(){
+                    localStorage.clear();
+                    this.router.navigate(['login'])
+                  }
+
+26.go to the dasboard.ts
+        logout()
+      {
+        //callig signout present in the services
+        this.auth.signOut();
+      }
+
+27.now without log in cannot go the dassboard.
+-------------------------ERROR AFER IT---------------------
+28.now letting angular call the api to view authorised data.
+29. ng g s api =>creates apiservice=>
+                  private baseUrl = 'https://localhost:7180/api/User';
+                  constructor(private http:HttpClient) { }
+
+                  getUsers()
+                  {
+                    return this.http.get<any>(this.baseUrl);
+                  }
+30.go to dasboard.html to view first in .ts => constructor(private api:ApiService,private auth:AuthService){
+                                              }
+
+                                              ngOnInit(){
+                                              this.api.getUsers()
+                                              .subscribe(res=>{this.users=res;})
+                                              }
+31.as we can not access the authorize part.
+32.we need to use Interceptors in angular to send data
